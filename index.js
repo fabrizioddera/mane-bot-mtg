@@ -17,11 +17,8 @@ bot.on("text", async (ctx) => {
   var matches = regExp.exec(ctx.message.text);
 
   if (matches != null && matches.length > 0) {
-    console.log(matches[1]);
 
     var encoded = encodeURIComponent(matches[1]);
-
-    console.log(encoded);
 
     var url = "https://api.scryfall.com/cards/named?exact=" + encoded;
 
