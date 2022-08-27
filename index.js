@@ -1,7 +1,7 @@
 const { Telegraf } = require("telegraf");
 const { exec: execAsync } = require("child-process-async");
 
-const bot = new Telegraf("5437902645:AAHUAf4UkunrP4XdKpEOXzly_85Y0p0TSgY");
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 bot.command("start", (ctx) => {
   console.log(ctx.from);
