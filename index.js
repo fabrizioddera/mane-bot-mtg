@@ -1,7 +1,7 @@
 const { Telegraf } = require("telegraf");
 const { exec: execAsync } = require("child-process-async");
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const bot = new Telegraf("5437902645:AAHUAf4UkunrP4XdKpEOXzly_85Y0p0TSgY");
 
 bot.command("start", (ctx) => {
   console.log(ctx.from);
@@ -13,16 +13,17 @@ bot.command("start", (ctx) => {
 });
 
 bot.on("text", async (ctx) => {
-  var regExp = /\[\[([^)]+)\]\]/;
-  var matches = regExp.exec(ctx.message.text);
+  var regExp = /\[\[([^)]+?)\]\]/g;
 
-  if (matches != null && matches.length > 0) {
+  while(null != (matches = regExp.exec(ctx.message.text))) {
+
+    console.log(matches);
 
     var encoded = encodeURIComponent(matches[1]);
 
     var url = "https://api.scryfall.com/cards/named?exact=" + encoded;
 
-    result = await execAsync(`curl -X GET ${url} `);
+    var result = await execAsync(`curl -X GET ${url} `);
     
     if (result != undefined && result.stdout != undefined) {
       var responseJson = JSON.parse(result.stdout);
@@ -35,7 +36,7 @@ bot.on("text", async (ctx) => {
         })
       }
     }
-  }
+ }
 });
 
 bot.launch();
