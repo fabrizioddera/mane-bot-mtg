@@ -4,7 +4,6 @@ const { exec: execAsync } = require("child-process-async");
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 bot.command("start", (ctx) => {
-  console.log(ctx.from);
   bot.telegram.sendMessage(
     ctx.chat.id,
     "Bella zio, siamo caldi come stufe. Per trovare una carta digita [[nomecarta]]",
@@ -16,8 +15,6 @@ bot.on("text", async (ctx) => {
   var regExp = /\[\[([^)]+?)\]\]/g;
 
   while(null != (matches = regExp.exec(ctx.message.text))) {
-
-    console.log(matches);
 
     var encoded = encodeURIComponent(matches[1]);
 
