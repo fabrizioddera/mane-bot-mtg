@@ -8,7 +8,8 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 bot.command("start", (ctx) => {
   bot.telegram.sendMessage(
     ctx.chat.id,
-    "Bella zio, siamo caldi come stufe. Per trovare una carta digita [[nomecarta]]",
+    "Bella zio, siamo caldi come stufe. Per trovare una carta digita [[nomecarta]], aggiungi $ davanti al nome per avere il prezzo, e se vuoi specificare il set usa \"|\" \n"
+    + "Ex.: [[$ lightning bolt | SLD]]",
     {}
   );
 });
