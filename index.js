@@ -1,6 +1,8 @@
 const { Telegraf } = require("telegraf");
 const { exec: execAsync } = require("child-process-async");
 
+require('dotenv').config();
+
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 bot.command("start", (ctx) => {
