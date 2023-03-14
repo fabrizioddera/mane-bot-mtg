@@ -1,5 +1,4 @@
-[processes]
-  worker= "node index.js"
-
-[[services]]
-  processes = ["sleep"]
+app = mane-bot-mtg
+kill_signal = "SIGINT"
+kill_timeout = 5
+processes = []
