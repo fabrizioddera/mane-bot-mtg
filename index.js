@@ -5,7 +5,7 @@ const server = require("./server.js")
 require('dotenv').config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
-server.listen(process.env.PORT || 3000)
+server.listen(process.env.PORT || 8080)
 
 bot.command("start", (ctx) => {
   bot.telegram.sendMessage(
