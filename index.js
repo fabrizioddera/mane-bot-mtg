@@ -48,10 +48,10 @@ bot.on("text", async (ctx) => {
       url += "&set=" + setEncoded;
     }
 
-    var result = await execAsync(`curl -X GET \"${url}\" `);
+    var res = await fetch(url);
     
-    if (result != undefined && result.stdout != undefined) {
-      var responseJson = JSON.parse(result.stdout);
+    if (res.ok) {
+      var responseJson = await res.json();
       if (
         responseJson.image_uris != undefined &&
         responseJson.image_uris.border_crop != undefined
