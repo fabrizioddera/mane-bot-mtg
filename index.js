@@ -1,10 +1,17 @@
 const { Telegraf } = require("telegraf");
 const { exec: execAsync } = require("child-process-async");
-const server = require("./server.js")
 
 require('dotenv').config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
+
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("Hello World");
+});
+
 server.listen(process.env.PORT || 8080)
 
 bot.command("start", (ctx) => {
