@@ -5,6 +5,15 @@ require('dotenv').config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("Hello World");
+});
+
+server.listen(process.env.PORT || 8080)
+
 bot.command("start", (ctx) => {
   bot.telegram.sendMessage(
     ctx.chat.id,
@@ -40,10 +49,10 @@ bot.on("text", async (ctx) => {
       url += "&set=" + setEncoded;
     }
 
-    var result = await execAsync(`curl -X GET \"${url}\" `);
+    var res = await fetch(url);
     
-    if (result != undefined && result.stdout != undefined) {
-      var responseJson = JSON.parse(result.stdout);
+    if (res.ok) {
+      var responseJson = await res.json();
       if (
         responseJson.image_uris != undefined &&
         responseJson.image_uris.border_crop != undefined
