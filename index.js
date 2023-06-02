@@ -53,10 +53,18 @@ bot.on("text", async (ctx) => {
     
     if (res.ok) {
       var responseJson = await res.json();
-      if (
-        responseJson.image_uris != undefined &&
-        responseJson.image_uris.border_crop != undefined
-      ) {
+      
+      //Gestione Double Faced Cards
+      var numFaces = 0;
+
+      if (responseJson.card_faces != undefined && responseJson.card_faces.length > 0 ){
+        numFaces = 2;
+      }
+      else if(responseJson.image_uris != undefined && responseJson.image_uris.border_crop != undefined ){
+        numFaces = 1;
+      }
+
+      if (numFaces > 0) {
         if(findPrice){
           var message = `€: ${responseJson.prices.eur ?? "non trovato"}`;
           if(responseJson.prices.eur_foil){
@@ -64,12 +72,34 @@ bot.on("text", async (ctx) => {
           }
           bot.telegram.sendMessage(ctx.chat.id, message);
         } else {
-          bot.telegram.sendPhoto(ctx.chat.id, {
-            url: responseJson.image_uris.border_crop,
-          });
+          if(numFaces == 1){
+            bot.telegram.sendPhoto(ctx.chat.id, {
+              url: responseJson.image_uris.border_crop,
+            });
+          }
+          else {
+            responseJson.card_faces.forEach(face => {
+              bot.telegram.sendPhoto(ctx.chat.id, {
+                url: face.image_uris.border_crop,
+              });
+            });
+          }
         }
       } else {
         bot.telegram.sendMessage(ctx.chat.id, "Belin, sta carta te la sei sognata");
+      }
+    }
+    else {
+      var responseJson = await res.json();
+      if(responseJson.status == 404){
+        if(responseJson.type == "ambiguous"){
+          bot.telegram.sendMessage(ctx.chat.id, "Ho trovato troppa roba, aiutami a restringere il cerchio");
+        } else {
+          bot.telegram.sendMessage(ctx.chat.id, "Belin, sta carta te la sei sognata");
+        }
+      }
+      else {
+        bot.telegram.sendMessage(ctx.chat.id, "Qualcosa è andato storto, chiedi al mane che sviluppa di guardare i log");
       }
     }
  }
