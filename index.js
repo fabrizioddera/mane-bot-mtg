@@ -17,8 +17,21 @@ server.listen(process.env.PORT || 8080)
 bot.command("start", (ctx) => {
   bot.telegram.sendMessage(
     ctx.chat.id,
-    "Bella zio, siamo caldi come stufe. Per trovare una carta digita [[nomecarta]], aggiungi $ davanti al nome per avere il prezzo, # per sapere la legalita' nei formati, e se vuoi specificare il set usa \"|\" CODICESET \n"
-    + "Ex.: [[$ lightning bolt | SLD]]",
+    "Bella zio, siamo caldi come stufe. Per trovare una carta digita [[nomecarta]] \n"
+    + "Ex.: [[ lightning bolt ]]",
+    {}
+  );
+});
+
+bot.command("info", (ctx) => {
+  bot.telegram.sendMessage(
+    ctx.chat.id,
+    "[[ nome carta ]] = ricerca immagine carta\n"
+    + "[[ nome carta | codiceset ]] = cerca la versione di un set specifico\n"
+    + "Parametri opzionali prima del nome:\n"
+    + "# = legalità nei formati\n"
+    + "$ = prezzo\n"
+    + "% = testo oracle ufficiale",
     {}
   );
 });
@@ -27,7 +40,6 @@ bot.on("text", async (ctx) => {
   var regExp = /\[\[([^)]+?)\]\]/g;
 
   while(null != (matches = regExp.exec(ctx.message.text))) {
-
    
     var inputString = matches[1];
     var split = inputString.split("|");
@@ -44,6 +56,10 @@ bot.on("text", async (ctx) => {
     else if(cardName[0] == "#"){
       cardName = cardName.substring(1).trim();
       specificResource = "legality";
+    }
+    else if(cardName[0] == "%"){
+      cardName = cardName.substring(1).trim();
+      specificResource = "oracle";
     }
 
     var nameEncoded = encodeURIComponent(cardName);
@@ -86,6 +102,10 @@ bot.on("text", async (ctx) => {
           + `commander: ${responseJson.legalities.commander.replaceAll("_"," ")}\n`
           + `pauper:    ${responseJson.legalities.pauper.replaceAll("_"," ")}`;
           
+          bot.telegram.sendMessage(ctx.chat.id, message);
+        } 
+        else if(specificResource == "oracle"){
+          var message = `${responseJson.oracle_text ?? "non trovato"}`;
           bot.telegram.sendMessage(ctx.chat.id, message);
         } 
         else {
