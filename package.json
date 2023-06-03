@@ -5,13 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start":"node index.js"
+    "start": "node index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "child-process-async": "^1.0.1",
     "dotenv": "^16.0.1",
+    "node-fetch": "^3.3.1",
     "telegraf": "^4.9.0"
   }
 }
