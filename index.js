@@ -31,7 +31,28 @@ bot.command("info", (ctx) => {
     + "Parametri opzionali prima del nome:\n"
     + "# = legalità nei formati\n"
     + "$ = prezzo\n"
-    + "% = testo oracle ufficiale",
+    + "% = testo oracle ufficiale\n"
+    + "it_ = versione italiana (o nella lingua specificata)",
+    {}
+  );
+});
+
+bot.command("languages", (ctx) => {
+  bot.telegram.sendMessage(
+    ctx.chat.id,
+    "Traduzioni disponibili (per alcune carte):\n"
+    +"en = Inglese\n"
+    +"es = Spagnolo\n"
+    +"fr = Francese\n"
+    +"de = Tedesco\n"
+    +"it = Italiano\n"
+    +"pt = Portoghese\n"
+    +"ja = Giapponese\n"
+    +"ko = Coreano\n"
+    +"ru = Russo\n"
+    +"zhs = Cinese Semplificato\n"
+    +"zht = Cinese Tradizionale\n"
+    +"ph = Phyrexiano\n",
     {}
   );
 });
@@ -49,6 +70,7 @@ bot.on("text", async (ctx) => {
 
     //Gestione ricerche risorse specifiche
     var specificResource = null;
+    var requestedLanguage = null;
     if(cardName[0] == "$"){
       cardName = cardName.substring(1).trim();
       specificResource = "price";
@@ -60,6 +82,12 @@ bot.on("text", async (ctx) => {
     else if(cardName[0] == "%"){
       cardName = cardName.substring(1).trim();
       specificResource = "oracle";
+    }
+    else if(cardName.includes("_")){
+      var languageSplit = cardName.split("_");
+      requestedLanguage = languageSplit[0].trim();
+      cardName = languageSplit[1].trim();
+      specificResource = "language";
     }
 
     var nameEncoded = encodeURIComponent(cardName);
@@ -107,6 +135,40 @@ bot.on("text", async (ctx) => {
         else if(specificResource == "oracle"){
           var message = `${responseJson.oracle_text ?? "non trovato"}`;
           bot.telegram.sendMessage(ctx.chat.id, message);
+        }
+        else if(specificResource == "language"){
+          var errMessage = "Carta non trovata nella lingua richiesta";
+          var imageUrls = [];
+          var versionsUrl = responseJson.prints_search_uri + "&include_multilingual=true";
+
+          var resVersions = await fetch(versionsUrl);
+          if (resVersions.ok){
+            var versionsJson = await resVersions.json();
+            versionsJson.data.forEach(v => {
+              if(imageUrls.length == 0 && v.lang == requestedLanguage && (setName == null || setName == v.set)){
+                debugger;
+                if(v.image_uris != undefined && v.image_uris.border_crop != undefined ){
+                  imageUrls.push(v.image_uris.border_crop);
+                }
+                else if (v.card_faces != undefined && v.card_faces.length > 0 ){
+                  v.card_faces.forEach(face => {
+                    imageUrls.push(face.image_uris.border_crop)
+                  });
+                }
+              }
+            });
+          }
+
+          if(imageUrls.length > 0){
+            imageUrls.forEach(u => {
+              bot.telegram.sendPhoto(ctx.chat.id, {
+                url: u,
+              });
+            });
+          }
+          else {
+            bot.telegram.sendMessage(ctx.chat.id, errMessage);
+          }
         } 
         else {
           if(numFaces == 1){
