@@ -1,6 +1,6 @@
 const { Telegraf } = require("telegraf");
 const { exec: execAsync } = require("child-process-async");
-
+const fetch = (url) => import('node-fetch').then(({default: fetch}) => fetch(url));
 require('dotenv').config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
