@@ -17,7 +17,7 @@ server.listen(process.env.PORT || 8080)
 bot.command("start", (ctx) => {
   bot.telegram.sendMessage(
     ctx.chat.id,
-    "Bella zio, siamo caldi come stufe. Per trovare una carta digita [[nomecarta]], aggiungi $ davanti al nome per avere il prezzo, e se vuoi specificare il set usa \"|\" \n"
+    "Bella zio, siamo caldi come stufe. Per trovare una carta digita [[nomecarta]], aggiungi $ davanti al nome per avere il prezzo, # per sapere la legalita' nei formati, e se vuoi specificare il set usa \"|\" CODICESET \n"
     + "Ex.: [[$ lightning bolt | SLD]]",
     {}
   );
@@ -35,11 +35,15 @@ bot.on("text", async (ctx) => {
     //Gestione codice espansione
     var setName = split[1] ? split[1].trim() : null;
 
-    //Gestione ricerca prezzo
-    var findPrice = false;
+    //Gestione ricerche risorse specifiche
+    var specificResource = null;
     if(cardName[0] == "$"){
       cardName = cardName.substring(1).trim();
-      findPrice = true;
+      specificResource = "price";
+    }
+    else if(cardName[0] == "#"){
+      cardName = cardName.substring(1).trim();
+      specificResource = "legality";
     }
 
     var nameEncoded = encodeURIComponent(cardName);
@@ -57,21 +61,34 @@ bot.on("text", async (ctx) => {
       //Gestione Double Faced Cards
       var numFaces = 0;
 
-      if (responseJson.card_faces != undefined && responseJson.card_faces.length > 0 ){
-        numFaces = 2;
-      }
-      else if(responseJson.image_uris != undefined && responseJson.image_uris.border_crop != undefined ){
+      if(responseJson.image_uris != undefined && responseJson.image_uris.border_crop != undefined ){
         numFaces = 1;
+      }
+      else if (responseJson.card_faces != undefined && responseJson.card_faces.length > 0 ){
+        numFaces = 2;
       }
 
       if (numFaces > 0) {
-        if(findPrice){
+        if(specificResource == "price"){
           var message = `€: ${responseJson.prices.eur ?? "non trovato"}`;
           if(responseJson.prices.eur_foil){
             message += `  |  € Foil: ${responseJson.prices.eur_foil}`;
           }
           bot.telegram.sendMessage(ctx.chat.id, message);
-        } else {
+        } 
+        else if(specificResource == "legality"){
+          var message = 
+            `standard:  ${responseJson.legalities.standard.replaceAll("_"," ")}\n`
+          + `pioneer:   ${responseJson.legalities.pioneer.replaceAll("_"," ")}\n`
+          + `modern:    ${responseJson.legalities.modern.replaceAll("_"," ")}\n`
+          + `legacy:    ${responseJson.legalities.legacy.replaceAll("_"," ")}\n`
+          + `vintage:   ${responseJson.legalities.vintage.replaceAll("_"," ")}\n`
+          + `commander: ${responseJson.legalities.commander.replaceAll("_"," ")}\n`
+          + `pauper:    ${responseJson.legalities.pauper.replaceAll("_"," ")}`;
+          
+          bot.telegram.sendMessage(ctx.chat.id, message);
+        } 
+        else {
           if(numFaces == 1){
             bot.telegram.sendPhoto(ctx.chat.id, {
               url: responseJson.image_uris.border_crop,
